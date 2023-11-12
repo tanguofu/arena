@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//       http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -79,5 +80,7 @@ func setupKubeconfig(kubeconfig string) (string, error) {
 	os.Setenv("KUBECONFIG", kubeconfig)
 	// set env
 	_, err = os.Stat(kubeconfig)
+
+	log.Debugf("use kubeconfig from: %s", kubeconfig)
 	return kubeconfig, err
 }

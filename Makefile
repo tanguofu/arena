@@ -77,8 +77,8 @@ endif
 .PHONY: cli-linux-amd64
 cli-linux-amd64:
 	mkdir -p bin
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=off go build -tags 'netgo' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/${ARENA_CLI_NAME} cmd/arena/*.go
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=off go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/${JOB_MONITOR} cmd/job-monitor/*.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -tags 'netgo' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/${ARENA_CLI_NAME} cmd/arena/*.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/${JOB_MONITOR} cmd/job-monitor/*.go
 
 .PHONY: cli-darwin-amd64
 cli-darwin-amd64:

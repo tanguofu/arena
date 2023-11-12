@@ -18,12 +18,21 @@ func getUserName(namespace string, clientConfig clientcmd.ClientConfig, restConf
 	if err != nil {
 		return nil, err
 	}
+
+	if raw, err := clientConfig.RawConfig(); err != nil {
+		if info, ok := raw.AuthInfos[raw.CurrentContext]; ok {
+			userName := info.Username
+			return &userName, nil
+		}
+	}
+
 	if tc.HasBasicAuth() {
 		userName := fmt.Sprintf("kubecfg:basicauth:%s", restConfig.Username)
 		return &userName, nil
 	}
 	if tc.HasCertAuth() {
-		userName := "kubecfg:certauth:admin"
+		// "userName := kubecfg:certauth:admin"
+		userName := fmt.Sprintf("kubecfg:certauth:%s", restConfig.Username)
 		return &userName, nil
 	}
 	var token string
