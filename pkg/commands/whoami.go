@@ -34,10 +34,14 @@ func NewWhoamiCommand() *cobra.Command {
 			d, err := json.Marshal(struct {
 				Name        string
 				Id          string
+				Account     string
+				Group       string
 				IsAdminUser bool
 			}{
 				Name:        user.GetName(),
 				Id:          user.GetId(),
+				Account:     user.GetAccount(),
+				Group:       user.GetGroup(),
 				IsAdminUser: config.GetArenaConfiger().IsAdminUser(),
 			})
 			if err != nil {

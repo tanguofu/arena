@@ -15,10 +15,44 @@
 package util
 
 import (
+	"bytes"
+	"fmt"
+	"path/filepath"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
+
+type MyFormatter struct{}
+
+func (m *MyFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	var b *bytes.Buffer
+	if entry.Buffer != nil {
+		b = entry.Buffer
+	} else {
+		b = &bytes.Buffer{}
+	}
+
+	b.WriteString(entry.Time.Format("2006-01-02 15:04:05"))
+	b.WriteString(" ")
+	b.WriteString(entry.Level.String())
+	b.WriteString(" ")
+	if entry.HasCaller() {
+		fileName := filepath.Base(entry.Caller.File)
+		funcNames := strings.Split(entry.Caller.Function, ".")
+		b.WriteString(fileName)
+		b.WriteString(":")
+		b.WriteString(funcNames[len(funcNames)-1])
+		b.WriteString(":")
+		b.WriteString(fmt.Sprintf("%d", entry.Caller.Line))
+		b.WriteString(" ")
+	}
+	b.WriteString(entry.Message)
+	b.WriteString("\n")
+
+	return b.Bytes(), nil
+}
 
 // SetLogLevel sets the logrus logging level
 func SetLogLevel(level string) {
@@ -34,4 +68,7 @@ func SetLogLevel(level string) {
 	default:
 		log.Fatalf("Unknown level: %s", level)
 	}
+
+	log.SetReportCaller(true)
+	logrus.SetFormatter(&MyFormatter{})
 }

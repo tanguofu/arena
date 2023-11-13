@@ -66,8 +66,10 @@ func (t *tokenRetriever) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 type User struct {
-	name string
-	id   string
+	name    string
+	id      string
+	account string
+	group   string
 }
 
 func (u User) GetName() string {
@@ -76,6 +78,14 @@ func (u User) GetName() string {
 
 func (u User) GetId() string {
 	return u.id
+}
+
+func (u User) GetAccount() string {
+	return u.account
+}
+
+func (u User) GetGroup() string {
+	return u.group
 }
 
 type ArenaConfiger struct {
@@ -124,8 +134,15 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	group, account, err := getAccountFromCert(clientConfig, *userName)
+	if err != nil {
+		return nil, err
+	}
+
 	log.Debugf("succeed to get user name: %v from client-go", *userName)
 	userId := util.Md5(*userName)
+
 	log.Debugf("the user id is %v", userId)
 	data := getGlobalConfigFromConfigmap(args.ArenaNamespace, clientSet)
 	adminUsers := getAdminUserFromConfigmap(data)
@@ -144,7 +161,7 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 		configs:                arenaConfigs,
 		isDaemonMode:           args.IsDaemonMode,
 		clusterInstalledCRDs:   []string{},
-		user:                   User{name: *userName, id: userId},
+		user:                   User{name: *userName, id: userId, group: group, account: account},
 		adminUsers:             adminUsers,
 		isolateUserInNamespace: i,
 		tokenRetriever:         tr,
