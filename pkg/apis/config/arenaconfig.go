@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -36,6 +37,8 @@ var once sync.Once
 // InitArenaConfiger initilize
 func InitArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 	once.Do(func() {
+		bytes, _ := json.Marshal(args)
+		log.Debugf("args: %s", string(bytes))
 		arenaClient, errInitArenaClient = newArenaConfiger(args)
 	})
 	return arenaClient, errInitArenaClient
@@ -130,6 +133,7 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 	*/
 	namespace := updateNamespace(args.Namespace, arenaConfigs, clientConfig)
 	log.Debugf("current namespace is %v", namespace)
+
 	userName, err := getUserName(namespace, clientConfig, restConfig, clientSet, tr)
 	if err != nil {
 		return nil, err

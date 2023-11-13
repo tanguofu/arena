@@ -16,6 +16,6 @@ const (
 	VolcanoCRDName             = "jobs.batch.volcano.sh"
 	VolcanoCRDNameInDaemonMode = "Job.batch.volcano.sh"
 
-	SparkCRDNameInDaemonMode = "Sparkapplication.sparkoperator.k8s.io"
 	SparkCRDName             = "sparkapplications.sparkoperator.k8s.io"
+	SparkCRDNameInDaemonMode = "Sparkapplication.sparkoperator.k8s.io"
 )

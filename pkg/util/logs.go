@@ -40,11 +40,13 @@ func (m *MyFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	b.WriteString(" ")
 	if entry.HasCaller() {
 		fileName := filepath.Base(entry.Caller.File)
-		funcNames := strings.Split(entry.Caller.Function, ".")
 		b.WriteString(fileName)
 		b.WriteString(":")
-		b.WriteString(funcNames[len(funcNames)-1])
-		b.WriteString(":")
+
+		// funcNames := strings.Split(entry.Caller.Function, ".")
+		// b.WriteString(funcNames[len(funcNames)-1])
+		// b.WriteString(":")
+
 		b.WriteString(fmt.Sprintf("%d", entry.Caller.Line))
 		b.WriteString(" ")
 	}
