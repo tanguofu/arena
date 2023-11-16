@@ -43,6 +43,6 @@ const (
 
 // label
 const (
-	UserNameNameLabel = "ti.cloud.tencent.com/user-id"
-	TaskRegionLabel   = "ti.cloud.tencent.com/region"
+	UserNameLabel   = "ti.cloud.tencent.com/user-id"
+	TaskRegionLabel = "ti.cloud.tencent.com/region"
 )

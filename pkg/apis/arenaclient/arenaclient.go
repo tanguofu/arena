@@ -60,7 +60,7 @@ func NewArenaClient(args types.ArenaClientArgs) (*ArenaClient, error) {
 func (a *ArenaClient) Training() *TrainingJobClient {
 	namespace := a.namespace
 	if a.namespace == "" {
-		namespace = fmt.Sprintf("train-%s", a.namespace)
+		namespace = fmt.Sprintf("train-%s", a.arenaConfiger.GetUser().GetName())
 	}
 	return NewTrainingJobClient(namespace, a.arenaSystemNamespace, a.arenaConfiger)
 }
@@ -69,7 +69,7 @@ func (a *ArenaClient) Training() *TrainingJobClient {
 func (a *ArenaClient) Serving() *ServingJobClient {
 	namespace := a.namespace
 	if a.namespace == "" {
-		namespace = fmt.Sprintf("infer-%s", a.namespace)
+		namespace = fmt.Sprintf("infer-%s", a.arenaConfiger.GetUser().GetName())
 	}
 	return NewServingJobClient(namespace, a.arenaConfiger)
 }

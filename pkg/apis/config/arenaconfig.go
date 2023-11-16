@@ -96,6 +96,19 @@ func (u User) GetGroup() string {
 	return u.group
 }
 
+type Cluster struct {
+	server string
+	name   string
+}
+
+func (c Cluster) GetServer() string {
+	return c.server
+}
+
+func (c Cluster) GetName() string {
+	return c.name
+}
+
 type ArenaConfiger struct {
 	restConfig             *rest.Config
 	clientConfig           clientcmd.ClientConfig
@@ -103,6 +116,7 @@ type ArenaConfiger struct {
 	dynamicClient          dynamic.Interface
 	apiExtensionClientset  *extclientset.Clientset
 	user                   User
+	cluster                Cluster
 	adminUsers             []User
 	namespace              string
 	arenaNamespace         string
@@ -137,6 +151,7 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 			return nil, err
 		}
 	*/
+
 	namespace := updateNamespace(args.Namespace, arenaConfigs, clientConfig)
 	log.Debugf("current namespace is %v", namespace)
 
@@ -161,18 +176,22 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 		return nil, err
 	}
 	log.Debugf("enable isolate user in namespace %v: %v", namespace, i)
+
+	cluser := GetClusterInfo(clientConfig)
+
 	return &ArenaConfiger{
 		restConfig:             restConfig,
 		clientConfig:           clientConfig,
 		clientset:              clientSet,
 		dynamicClient:          dynamicClient,
 		apiExtensionClientset:  apiExtensionClientSet,
-		namespace:              namespace,
+		namespace:              args.Namespace,
 		arenaNamespace:         args.ArenaNamespace,
 		configs:                arenaConfigs,
 		isDaemonMode:           args.IsDaemonMode,
 		clusterInstalledCRDs:   []string{},
 		user:                   User{name: *userName, id: userId, group: group, account: account},
+		cluster:                cluser,
 		adminUsers:             adminUsers,
 		isolateUserInNamespace: i,
 		tokenRetriever:         tr,
@@ -259,6 +278,10 @@ func (a *ArenaConfiger) GetClusterInstalledCRDs() []string {
 
 func (a *ArenaConfiger) GetUser() User {
 	return a.user
+}
+
+func (a *ArenaConfiger) GetCluster() Cluster {
+	return a.cluster
 }
 
 func (a *ArenaConfiger) IsIsolateUserInNamespace() bool {

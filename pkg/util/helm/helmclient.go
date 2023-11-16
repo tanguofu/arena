@@ -35,7 +35,7 @@ type HelmClient struct {
 func NewHelmClient(namespace string) (*HelmClient, error) {
 
 	actionConfig := new(action.Configuration)
-	err := actionConfig.Init(config.GetArenaConfiger(), namespace, os.Getenv("HELM_DRIVER"), log.Printf)
+	err := actionConfig.Init(config.GetArenaConfiger(), namespace, os.Getenv("HELM_DRIVER"), log.Debugf)
 	if err != nil {
 		return nil, err
 	}
@@ -45,22 +45,48 @@ func NewHelmClient(namespace string) (*HelmClient, error) {
 	return client, nil
 }
 
-func (h *HelmClient) ToYamlMap(vals interface{}, valsMap map[string]interface{}) error {
+func transvalueType(vals map[string]interface{}) map[string]interface{} {
 
+	typedMap := make(map[string]interface{})
+	for k, v := range vals {
+		if m, ok := v.(map[interface{}]interface{}); ok {
+
+			transMap := make(map[string]interface{})
+			b, _ := yaml.Marshal(m)
+			yaml.Unmarshal(b, transMap)
+
+			typedMap[k] = transvalueType(transMap)
+			continue
+		}
+		// other key
+		typedMap[k] = v
+	}
+
+	return typedMap
+
+}
+
+func (h *HelmClient) ToYamlMap(vals interface{}) (map[string]interface{}, error) {
+
+	var valsMap map[string]interface{}
 	yamlBytes, err := yaml.Marshal(vals)
 	if err != nil {
 		log.Errorf("yaml.Marshal vals:%v err: %v", vals, err)
-		return err
+		return valsMap, err
 	}
-
-	log.Debugf("after Marshal vals: %s", string(yamlBytes))
 
 	if err := yaml.Unmarshal(yamlBytes, &valsMap); err != nil {
 		log.Errorf("yaml.Unmarshal vals:%v err: %v", vals, err)
-		return err
+		return valsMap, err
 	}
 
-	return nil
+	typeVals := transvalueType(valsMap)
+	/*
+		for k, v := range typeVals {
+			log.Debugf("ToYamlMap key:%T %+v, value:%T %+v", k, k, v, v)
+		}
+	*/
+	return typeVals, err
 }
 
 func (h *HelmClient) TemplateRelease(name string, valsMap map[string]interface{}, chartName string, options ...string) (string, error) {
@@ -80,7 +106,7 @@ func (h *HelmClient) TemplateRelease(name string, valsMap map[string]interface{}
 
 	rel, err := client.Run(charts, valsMap)
 	if err != nil {
-		log.Errorf("render name: %s chart: %s  failed, err: %v", name, chartName, err)
+		log.Errorf("render namespace:%s name: %s chart: %s failed, err: %v", h.namespace, name, chartName, err)
 		return "", err
 	}
 	//  there is no hook in charts
@@ -99,16 +125,16 @@ func (h *HelmClient) InstallRelease(name string, valsMap map[string]interface{},
 	client.ReleaseName = name
 	client.Namespace = h.namespace
 	client.DryRunOption = "none"
-	// client.CreateNamespace = true
+	client.CreateNamespace = true
 	client.Replace = true // Skip the name check
 
 	rel, err := client.Run(charts, valsMap)
 	if err != nil {
-		log.Errorf("install name: %s chart: %s  failed, err: %v", name, chartName, err)
+		log.Errorf("install namespace:%s name: %s chart: %s failed, err: %v", h.namespace, name, chartName, err)
 		return err
 	}
 
-	log.Debugf("InstallRelease %s/%s done", rel.Namespace, rel.Name)
+	log.Infof("InstallRelease %s/%s done", rel.Namespace, rel.Name)
 	// there is no hook in charts
 	return nil
 }
@@ -128,7 +154,7 @@ func (h *HelmClient) UpdateRelease(name string, valsMap map[string]interface{}, 
 
 	rel, err := client.Run(name, charts, valsMap)
 	if err != nil {
-		log.Errorf("update name: %s chart: %s  failed, err: %v", name, chartName, err)
+		log.Errorf("update namespace:%s name: %s chart: %s  failed, err: %v", h.namespace, name, chartName, err)
 		return err
 	}
 
@@ -155,7 +181,7 @@ func (h *HelmClient) CheckRelease(name string) (bool, error) {
 
 	if rel[0].Info != nil {
 		bytes, _ := json.Marshal(rel[0].Info)
-		log.Debugf("chart:%s install info: %s", name, string(bytes))
+		log.Debugf("chart:%s already installed, info: %s", name, string(bytes))
 	}
 
 	return true, nil

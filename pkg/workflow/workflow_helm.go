@@ -16,28 +16,29 @@ func SubmitJobByHelm(name string, trainingType string, namespace string, values 
 	}
 
 	chartName := fmt.Sprintf("%s-%s", name, trainingType)
-	var valsMap map[string]interface{}
-	if err := h.ToYamlMap(values, valsMap); err != nil {
-		log.Errorf("parse value failed, %+v", values)
+	exist, err := h.CheckRelease(chartName)
+	if err != nil {
+		log.Errorf("check release: %s/%s failed, err: %v", namespace, chartName, err)
 		return err
 	}
 
-	exist, err := h.CheckRelease(chartName)
+	valsMap, err := h.ToYamlMap(values)
 	if err != nil {
-		log.Errorf("check release: %s failed, err: %v", chartName)
+		log.Errorf("parse value failed, %+v", values)
 		return err
 	}
 
 	templates, err := h.TemplateRelease(chartName, valsMap, chart, options...)
 	if err != nil {
-		log.Errorf("template release: %s failed, err: %v", chartName)
+		log.Errorf("template release: %s/%s failed, err: %v", namespace, chartName, err)
 		return err
 	}
 
-	file, err := os.CreateTemp("/tmp", chartName)
-	log.Info("save template yaml into: %s", file.Name())
-	file.WriteString(templates)
-	file.Close()
+	if file, err := os.CreateTemp("/tmp", fmt.Sprintf("%s-%s-*.yaml", namespace, chartName)); err == nil {
+		log.Infof("save %s/%s template yaml into: %s", namespace, chartName, file.Name())
+		file.WriteString(templates)
+		file.Close()
+	}
 
 	if !exist {
 		return h.InstallRelease(chartName, valsMap, chart, options...)
@@ -56,12 +57,12 @@ func DeleteJobByHelm(name, namespace, trainingType string) error {
 	chartName := fmt.Sprintf("%s-%s", name, trainingType)
 	ok, err := h.CheckRelease(chartName)
 	if err != nil {
-		log.Errorf("check release: %s failed, err: %v", chartName)
+		log.Errorf("check release: %s/%s failed, err: %v", namespace, chartName, err)
 		return err
 	}
 
 	if !ok {
-		log.Warnf("release is not install, name: %s", chartName)
+		log.Warnf("release is not install, name: %s/%s", namespace, chartName)
 		return nil
 	}
 

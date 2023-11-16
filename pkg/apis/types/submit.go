@@ -98,7 +98,7 @@ type CommonSubmitArgs struct {
 	PriorityClassName string `yaml:"priorityClassName"`
 
 	// Coscheduling defines using Coscheduling
-	Coscheduling bool
+	Coscheduling bool `yaml:"coscheduling"`
 
 	// PodGroupName stores pod group name
 	PodGroupName string `yaml:"podGroupName"`
@@ -130,13 +130,13 @@ type CommonSubmitArgs struct {
 	UseHostIPC bool `yaml:"useHostIPC"`
 
 	// GpuType defines which gpu used
-	GpuType string `yaml:"gputype"`
+	GpuType string `yaml:"gpuType"`
 
 	// ResourceGroup defines which resourcegroup used
-	InstanceType string `yaml:"instancetype"`
+	InstanceType string `yaml:"instanceType"`
 
 	// ResourceGroup defines which resourcegroup used
-	ResourceGroup string `yaml:"resourcegroup"`
+	ResourceGroup string `yaml:"resourceGroup"`
 
 	// Region defines which Region used
 	Region string `yaml:"region"`

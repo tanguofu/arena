@@ -436,8 +436,8 @@ func (s *ServingArgsBuilder) setUserNameAndUserId() error {
 	}
 	arenaConfiger := config.GetArenaConfiger()
 	user := arenaConfiger.GetUser()
-	s.args.Labels[types.UserNameIdLabel] = user.GetId()
-	s.args.Annotations[types.UserNameNameLabel] = user.GetName()
+	s.args.Labels[types.UserNameLabel] = user.GetName()
+	s.args.Annotations[types.UserNameLabel] = user.GetName()
 	return nil
 }
 

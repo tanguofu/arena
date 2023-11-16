@@ -31,18 +31,23 @@ func NewWhoamiCommand() *cobra.Command {
 				return fmt.Errorf("failed to create arena client: %v", err)
 			}
 			user := config.GetArenaConfiger().GetUser()
+			cluster := config.GetArenaConfiger().GetCluster()
 			d, err := json.Marshal(struct {
 				Name        string
 				Id          string
 				Account     string
 				Group       string
 				IsAdminUser bool
+				Server      string
+				ClusterName string
 			}{
 				Name:        user.GetName(),
 				Id:          user.GetId(),
 				Account:     user.GetAccount(),
 				Group:       user.GetGroup(),
 				IsAdminUser: config.GetArenaConfiger().IsAdminUser(),
+				Server:      cluster.GetServer(),
+				ClusterName: cluster.GetName(),
 			})
 			if err != nil {
 				return err

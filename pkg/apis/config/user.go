@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	authenticationapi "k8s.io/api/authentication/v1"
@@ -47,7 +47,7 @@ func getUserName(namespace string, clientConfig clientcmd.ClientConfig, restConf
 	var token string
 	if tc.HasTokenAuth() {
 		if restConfig.BearerTokenFile != "" {
-			tokenContent, err := ioutil.ReadFile(restConfig.BearerTokenFile)
+			tokenContent, err := os.ReadFile(restConfig.BearerTokenFile)
 			if err != nil {
 				return nil, err
 			}
@@ -117,6 +117,18 @@ func getAccountFromCert(clientConfig clientcmd.ClientConfig, userName string) (s
 
 	return "", "", errors.NewNotFound(schema.GroupResource{Group: "rbac.authorization.k8s.io", Resource: "ClusterRoleBinding"}, userName)
 }
+
+func GetClusterInfo(clientConfig clientcmd.ClientConfig) Cluster {
+
+	raw, _ := clientConfig.RawConfig()
+
+	currentContext := raw.Contexts[raw.CurrentContext]
+
+	cluster := raw.Clusters[currentContext.Cluster]
+
+	return Cluster{server: cluster.Server, name: currentContext.Cluster}
+}
+
 func createSubjectRulesReviews(namespace string, kubeclient kubernetes.Interface) error {
 	sar := &authorizationv1.SelfSubjectRulesReview{
 		Spec: authorizationv1.SelfSubjectRulesReviewSpec{

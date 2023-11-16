@@ -19,7 +19,6 @@ import (
 
 	"github.com/kubeflow/arena/pkg/apis/types"
 	"github.com/kubeflow/arena/pkg/apis/utils"
-	"github.com/kubeflow/arena/pkg/util/helm"
 	"github.com/kubeflow/arena/pkg/util/kubeclient"
 	"github.com/kubeflow/arena/pkg/workflow"
 	log "github.com/sirupsen/logrus"
@@ -31,13 +30,16 @@ func DeleteTrainingJob(jobName, namespace string, jobType types.TrainingJobType)
 		return fmt.Errorf("Unsupport job type,arena only supports: [%v]", utils.GetSupportTrainingJobTypesInfo())
 	}
 	// 1. Handle legacy training job
-	err := helm.DeleteRelease(jobName)
-	if err == nil {
-		log.Infof("Delete the job %s successfully.", jobName)
-		return nil
-	}
-	log.Debugf("%s wasn't deleted by helm due to %v", jobName, err)
+	/*
+		err := helm.DeleteRelease(jobName)
+		if err == nil {
+			log.Infof("Delete the job %s successfully.", jobName)
+			return nil
+		}
+		log.Debugf("%s wasn't deleted by helm due to %v", jobName, err)
+	*/
 	// if the jobType is sure,delete the job
+	var err error
 	if jobType != types.AllTrainingJob {
 		canDelete, err := kubeclient.CheckJobIsOwnedByUser(namespace, jobName, jobType)
 		if err != nil {

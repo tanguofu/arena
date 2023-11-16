@@ -3,6 +3,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-pytorchjob
+  namespace: {{ .Release.Namespace }}
   annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /
   labels:

@@ -320,25 +320,6 @@ func (s *SubmitArgsBuilder) setAnnotations() error {
 	if s.args.Annotations == nil {
 		s.args.Annotations = map[string]string{}
 	}
-	argKey := "annotation"
-	var annotations *[]string
-	item, ok := s.argValues[argKey]
-	if !ok {
-		return nil
-	}
-	annotations = item.(*[]string)
-	if len(*annotations) <= 0 {
-		return nil
-	}
-
-	for key, val := range transformSliceToMap(*annotations, "=") {
-		s.args.Annotations[key] = val
-	}
-
-	value := s.args.Annotations[aliyunENIAnnotation]
-	if value == "true" {
-		s.args.UseENI = true
-	}
 
 	s.args.Annotations["ti.cloud.tencent.com/task-type"] = "Training"
 
@@ -362,6 +343,26 @@ func (s *SubmitArgsBuilder) setAnnotations() error {
 		s.args.Annotations[types.ResourceGroupRegionAnno] = s.args.Region
 	}
 
+	argKey := "annotation"
+	var annotations *[]string
+	item, ok := s.argValues[argKey]
+	if !ok {
+		return nil
+	}
+	annotations = item.(*[]string)
+	if len(*annotations) <= 0 {
+		return nil
+	}
+
+	for key, val := range transformSliceToMap(*annotations, "=") {
+		s.args.Annotations[key] = val
+	}
+
+	value := s.args.Annotations[aliyunENIAnnotation]
+	if value == "true" {
+		s.args.UseENI = true
+	}
+
 	return nil
 }
 
@@ -381,6 +382,11 @@ func (s *SubmitArgsBuilder) setLabels() error {
 	if s.args.Labels == nil {
 		s.args.Labels = map[string]string{}
 	}
+
+	if s.args.Region != "" {
+		s.args.Labels[types.TaskRegionLabel] = s.args.Region
+	}
+
 	argKey := "label"
 	var labels *[]string
 	item, ok := s.argValues[argKey]
@@ -391,17 +397,10 @@ func (s *SubmitArgsBuilder) setLabels() error {
 	if len(*labels) <= 0 {
 		return nil
 	}
-	if s.args.Labels == nil {
-		s.args.Labels = map[string]string{}
-	}
+
 	for key, val := range transformSliceToMap(*labels, "=") {
 		s.args.Labels[key] = val
 	}
-
-	if s.args.Region != "" {
-		s.args.Labels[types.TaskRegionLabel] = s.args.Region
-	}
-
 	return nil
 }
 
@@ -414,8 +413,8 @@ func (s *SubmitArgsBuilder) setUserNameAndUserId() error {
 	}
 	arenaConfiger := config.GetArenaConfiger()
 	user := arenaConfiger.GetUser()
-	s.args.Labels[types.UserNameIdLabel] = user.GetName()
-	s.args.Annotations[types.UserNameNameLabel] = user.GetName()
+	s.args.Labels[types.UserNameLabel] = user.GetName()
+	s.args.Annotations[types.UserNameLabel] = user.GetName()
 	return nil
 }
 
