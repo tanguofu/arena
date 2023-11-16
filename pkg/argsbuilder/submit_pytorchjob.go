@@ -152,9 +152,13 @@ func (s *SubmitPytorchJobArgsBuilder) check() error {
 		}
 	}
 	if s.args.Memory != "" {
-		_, err := resource.ParseQuantity(s.args.Memory)
+		quantity, err := resource.ParseQuantity(s.args.Memory)
 		if err != nil {
 			return fmt.Errorf("--memory is invalid")
+		}
+
+		if quantity.CmpInt64(1024*1024*100) == -1 {
+			return fmt.Errorf("--memory is too small,now value is %s, please set 1Gi as minimum", quantity.String())
 		}
 	}
 	if s.args.ActiveDeadlineSeconds < 0 {
