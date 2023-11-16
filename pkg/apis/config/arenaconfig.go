@@ -16,9 +16,14 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	extclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/discovery/cached/memory"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -95,6 +100,7 @@ type ArenaConfiger struct {
 	restConfig             *rest.Config
 	clientConfig           clientcmd.ClientConfig
 	clientset              *kubernetes.Clientset
+	dynamicClient          dynamic.Interface
 	apiExtensionClientset  *extclientset.Clientset
 	user                   User
 	adminUsers             []User
@@ -113,7 +119,7 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 	if err != nil {
 		return nil, err
 	}
-	clientConfig, restConfig, clientSet, err := initKubeClient(args.Kubeconfig)
+	clientConfig, restConfig, clientSet, dynamicClient, err := initKubeClient(args.Kubeconfig)
 	if err != nil {
 		return nil, err
 	}
@@ -159,6 +165,7 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 		restConfig:             restConfig,
 		clientConfig:           clientConfig,
 		clientset:              clientSet,
+		dynamicClient:          dynamicClient,
 		apiExtensionClientset:  apiExtensionClientSet,
 		namespace:              namespace,
 		arenaNamespace:         args.ArenaNamespace,
@@ -171,6 +178,36 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 		tokenRetriever:         tr,
 	}, nil
 
+}
+
+func (a *ArenaConfiger) ToRESTConfig() (*rest.Config, error) {
+	return a.restConfig, nil
+}
+
+func (a *ArenaConfiger) ToDiscoveryClient() (discovery.CachedDiscoveryInterface, error) {
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(a.restConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	cachedDiscoveryClient := memory.NewMemCacheClient(discoveryClient)
+	return cachedDiscoveryClient, nil
+}
+
+func (a *ArenaConfiger) ToRESTMapper() (meta.RESTMapper, error) {
+
+	cachedDiscoveryClient, err := a.ToDiscoveryClient()
+	if err != nil {
+		return nil, err
+	}
+
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(cachedDiscoveryClient)
+	expander := restmapper.NewShortcutExpander(mapper, cachedDiscoveryClient)
+	return expander, nil
+}
+
+func (a *ArenaConfiger) ToRawKubeConfigLoader() clientcmd.ClientConfig {
+	return a.clientConfig
 }
 
 // GetClientConfig returns the kubernetes ClientConfig
@@ -186,6 +223,11 @@ func (a *ArenaConfiger) GetRestConfig() *rest.Config {
 // GetClientSet returns the kubernetes ClientSet
 func (a *ArenaConfiger) GetClientSet() *kubernetes.Clientset {
 	return a.clientset
+}
+
+// GetDynamicClient returns the kubernetes dynamic.Interface
+func (a *ArenaConfiger) GetDynamicClient() dynamic.Interface {
+	return a.dynamicClient
 }
 
 func (a *ArenaConfiger) GetAPIExtensionClientSet() *extclientset.Clientset {

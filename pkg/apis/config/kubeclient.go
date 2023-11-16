@@ -21,16 +21,17 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func initKubeClient(kubeconfig string) (clientcmd.ClientConfig, *rest.Config, *kubernetes.Clientset, error) {
+func initKubeClient(kubeconfig string) (clientcmd.ClientConfig, *rest.Config, *kubernetes.Clientset, dynamic.Interface, error) {
 	var err error
 	kubeconfig, err = setupKubeconfig(kubeconfig)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	loadingRules.ExplicitPath = kubeconfig
@@ -40,16 +41,18 @@ func initKubeClient(kubeconfig string) (clientcmd.ClientConfig, *rest.Config, *k
 	// create rest config
 	restConfig, err := clientConfig.ClientConfig()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	restConfig.QPS = 10
 	restConfig.Burst = 20
 	// create the clientset
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
-	return clientConfig, restConfig, clientset, nil
+
+	dynamicClient, err := dynamic.NewForConfig(restConfig)
+	return clientConfig, restConfig, clientset, dynamicClient, nil
 }
 
 func setupKubeconfig(kubeconfig string) (string, error) {

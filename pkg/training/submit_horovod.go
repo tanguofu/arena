@@ -44,7 +44,7 @@ func SubmitHorovodJob(namespace string, submitArgs *types.SubmitHorovodJobArgs) 
 	}
 	// the master is also considered as a worker
 	horovodTrainingChart := util.GetChartsFolder() + "/tf-horovod"
-	err = workflow.SubmitJob(submitArgs.Name, string(types.HorovodTrainingJob), namespace, submitArgs, horovodTrainingChart, submitArgs.HelmOptions...)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.HorovodTrainingJob), namespace, submitArgs, horovodTrainingChart, submitArgs.HelmOptions...)
 	if err != nil {
 		return err
 	}

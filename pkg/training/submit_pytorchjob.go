@@ -45,7 +45,7 @@ func SubmitPytorchJob(namespace string, submitArgs *types.SubmitPyTorchJobArgs) 
 	// the master is also considered as a worker
 	submitArgs.WorkerCount = submitArgs.WorkerCount - 1
 	pytorchjobChart := util.GetChartsFolder() + "/pytorchjob"
-	err = workflow.SubmitJob(submitArgs.Name, string(types.PytorchTrainingJob), namespace, submitArgs, pytorchjobChart, submitArgs.HelmOptions...)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.PytorchTrainingJob), namespace, submitArgs, pytorchjobChart, submitArgs.HelmOptions...)
 	if err != nil {
 		return err
 	}

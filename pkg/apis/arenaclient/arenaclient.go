@@ -12,10 +12,11 @@ import (
 
 // ArenaClient is a client which includes operations:
 // 1.manage training jobs,like:
-//   * submit a training job
-//   * get a training job information
-//   * get job logs
-//   * delete a job
+//   - submit a training job
+//   - get a training job information
+//   - get job logs
+//   - delete a job
+//
 // TODO: 2.manage serving job
 // TODO: 3.manage node
 // it serves for commands and apis
@@ -57,12 +58,20 @@ func NewArenaClient(args types.ArenaClientArgs) (*ArenaClient, error) {
 
 // Training returns the Training Job Client
 func (a *ArenaClient) Training() *TrainingJobClient {
-	return NewTrainingJobClient(a.namespace, a.arenaSystemNamespace, a.arenaConfiger)
+	namespace := a.namespace
+	if a.namespace == "" {
+		namespace = fmt.Sprintf("train-%s", a.namespace)
+	}
+	return NewTrainingJobClient(namespace, a.arenaSystemNamespace, a.arenaConfiger)
 }
 
 // Serving returns the Serving job client
 func (a *ArenaClient) Serving() *ServingJobClient {
-	return NewServingJobClient(a.namespace, a.arenaConfiger)
+	namespace := a.namespace
+	if a.namespace == "" {
+		namespace = fmt.Sprintf("infer-%s", a.namespace)
+	}
+	return NewServingJobClient(namespace, a.arenaConfiger)
 }
 
 // Serving returns the Cron client

@@ -44,7 +44,7 @@ func SubmitMPIJob(namespace string, submitArgs *types.SubmitMPIJobArgs) (err err
 	}
 	// the master is also considered as a worker
 	mpijobChart := util.GetChartsFolder() + "/mpijob"
-	err = workflow.SubmitJob(submitArgs.Name, string(types.MPITrainingJob), namespace, submitArgs, mpijobChart, submitArgs.HelmOptions...)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.MPITrainingJob), namespace, submitArgs, mpijobChart, submitArgs.HelmOptions...)
 	if err != nil {
 		return err
 	}

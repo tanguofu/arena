@@ -128,6 +128,18 @@ type CommonSubmitArgs struct {
 
 	// UseHostIPC defines using useHostIPC
 	UseHostIPC bool `yaml:"useHostIPC"`
+
+	// GpuType defines which gpu used
+	GpuType string `yaml:"gputype"`
+
+	// ResourceGroup defines which resourcegroup used
+	InstanceType string `yaml:"instancetype"`
+
+	// ResourceGroup defines which resourcegroup used
+	ResourceGroup string `yaml:"resourcegroup"`
+
+	// Region defines which Region used
+	Region string `yaml:"region"`
 }
 
 // DataDirVolume defines the volume of kubernetes

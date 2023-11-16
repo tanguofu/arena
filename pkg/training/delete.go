@@ -50,14 +50,14 @@ func DeleteTrainingJob(jobName, namespace string, jobType types.TrainingJobType)
 		if !canDelete {
 			return types.ErrNoPrivilegesToOperateJob
 		}
-		return workflow.DeleteJob(jobName, namespace, string(jobType))
+		return workflow.DeleteJobByHelm(jobName, namespace, string(jobType))
 	}
 	// 2. Handle training jobs created by arena
 	trainingTypes, err = getTrainingTypes(jobName, namespace)
 	if err != nil {
 		return err
 	}
-	err = workflow.DeleteJob(jobName, namespace, trainingTypes[0])
+	err = workflow.DeleteJobByHelm(jobName, namespace, trainingTypes[0])
 	if err != nil {
 		return err
 	}

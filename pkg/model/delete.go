@@ -1,10 +1,11 @@
 package model
 
 import (
+	"strings"
+
 	"github.com/kubeflow/arena/pkg/apis/types"
 	"github.com/kubeflow/arena/pkg/workflow"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 func DeleteModelJob(namespace, name string, jobType types.ModelJobType) error {
@@ -16,7 +17,7 @@ func DeleteModelJob(namespace, name string, jobType types.ModelJobType) error {
 		}
 		return err
 	}
-	err = workflow.DeleteJob(name, namespace, string(job.Type()))
+	err = workflow.DeleteJobByHelm(name, namespace, string(job.Type()))
 	if err != nil {
 		return err
 	}

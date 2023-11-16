@@ -402,7 +402,11 @@ func (tt *PyTorchJobTrainer) ListTrainingJobs(namespace string, allNamespace boo
 		namespace = metav1.NamespaceAll
 	}
 	trainingJobs := []TrainingJob{}
-	jobLabels := GetTrainingJobLabels(tt.Type())
+
+	jobLabels := ""
+	if !allNamespace {
+		jobLabels = GetTrainingJobLabels(tt.Type())
+	}
 	// list all jobs from k8s apiserver
 	pytorchjobs, err := k8saccesser.GetK8sResourceAccesser().ListPytorchJobs(tt.pytorchjobClient, namespace, jobLabels)
 	if err != nil {

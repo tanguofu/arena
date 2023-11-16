@@ -21,13 +21,17 @@ func GetChartsFolder() string {
 	if chartFolder != "" {
 		return chartFolder
 	}
-	homeChartsFolder := os.Getenv("HOME") + "/charts"
-	if !pathExists(homeChartsFolder) {
-		chartFolder = "/charts"
-
-	} else {
-		chartFolder = homeChartsFolder
+	chartFolder := "/charts"
+	homeChartsFolder := os.Getenv("HOME") + chartFolder
+	if pathExists(homeChartsFolder) {
+		return homeChartsFolder
 	}
+
+	pwdChartFolder := os.Getenv("PWD") + chartFolder
+	if pathExists(pwdChartFolder) {
+		return pwdChartFolder
+	}
+
 	return chartFolder
 }
 

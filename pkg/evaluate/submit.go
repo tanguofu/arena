@@ -10,7 +10,7 @@ import (
 func SubmitEvaluateJob(namespace string, submitArgs *types.EvaluateJobArgs) (err error) {
 	evaluateJobChart := util.GetChartsFolder() + "/evaluatejob"
 
-	err = workflow.SubmitJob(submitArgs.Name, string(types.EvaluateJob), namespace, submitArgs, evaluateJobChart, submitArgs.HelmOptions...)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.EvaluateJob), namespace, submitArgs, evaluateJobChart, submitArgs.HelmOptions...)
 	if err != nil {
 		return err
 	}

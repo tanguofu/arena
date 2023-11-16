@@ -247,7 +247,7 @@ func SubmitSeldonServingJob(namespace string, args *types.SeldonServingArgs) (er
 	log.Infof("seldon chart path: %s", chart)
 	temp, _ := json.Marshal(args)
 	log.Infof("seldon args: %s", string(temp))
-	err = workflow.SubmitJob(nameWithVersion, string(types.SeldonServingJob), namespace, args, chart, args.HelmOptions...)
+	err = workflow.SubmitJobByHelm(nameWithVersion, string(types.SeldonServingJob), namespace, args, chart, args.HelmOptions...)
 	if err != nil {
 		return err
 	}

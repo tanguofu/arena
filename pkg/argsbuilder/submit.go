@@ -142,6 +142,11 @@ func (s *SubmitArgsBuilder) AddCommandFlags(command *cobra.Command) {
 	command.Flags().BoolVar(&s.args.UseHostIPC, "hostIPC", false, `enable hostIPC, usage: "--hostIPC true"`)
 	// add option --scheduler
 	command.Flags().BoolVar(&s.args.UseHostPID, "hostPID", false, `enable hostPID, usage: "--hostPID true"`)
+	// for anno
+	command.Flags().StringVar(&s.args.GpuType, "gpu-type", "", `the gpu type, usage: "--gpuType T4 or --gpuType HCC-A800"`)
+	command.Flags().StringVar(&s.args.ResourceGroup, "resource-group", "", `the resourcegroup of nodes, either resourcegroup or instance-type must be set, usage: "--resource-group trsg-xxx"`)
+	command.Flags().StringVar(&s.args.ResourceGroup, "instance-type", "", `the instance-type of nodes, either resourcegroup or instance-type must be set, usage: "--instance-type TI.S.MEDIUM.POST"`)
+	command.Flags().StringVar(&s.args.GpuType, "region", "", `the region of node usage: "--region ap-shanghai"`)
 
 	s.AddArgValue("image-pull-secret", &imagePullSecrets).
 		AddArgValue("config-file", &configFiles).
@@ -325,16 +330,38 @@ func (s *SubmitArgsBuilder) setAnnotations() error {
 	if len(*annotations) <= 0 {
 		return nil
 	}
-	if s.args.Annotations == nil {
-		s.args.Annotations = map[string]string{}
-	}
+
 	for key, val := range transformSliceToMap(*annotations, "=") {
 		s.args.Annotations[key] = val
 	}
+
 	value := s.args.Annotations[aliyunENIAnnotation]
 	if value == "true" {
 		s.args.UseENI = true
 	}
+
+	s.args.Annotations["ti.cloud.tencent.com/task-type"] = "Training"
+
+	if s.args.EnableRDMA {
+		s.args.Annotations[types.EnableRDMAAnno] = "1"
+	}
+
+	if s.args.GpuType != "" {
+		s.args.Annotations[types.GpuTypeAnno] = s.args.GpuType
+	}
+
+	if s.args.InstanceType != "" {
+		s.args.Annotations[types.InstanceTypeAnno] = s.args.InstanceType
+	}
+
+	if s.args.ResourceGroup != "" {
+		s.args.Annotations[types.ResourceGroupIdAnno] = s.args.ResourceGroup
+	}
+
+	if s.args.Region != "" {
+		s.args.Annotations[types.ResourceGroupRegionAnno] = s.args.Region
+	}
+
 	return nil
 }
 
@@ -370,6 +397,11 @@ func (s *SubmitArgsBuilder) setLabels() error {
 	for key, val := range transformSliceToMap(*labels, "=") {
 		s.args.Labels[key] = val
 	}
+
+	if s.args.Region != "" {
+		s.args.Labels[types.TaskRegionLabel] = s.args.Region
+	}
+
 	return nil
 }
 
@@ -382,7 +414,7 @@ func (s *SubmitArgsBuilder) setUserNameAndUserId() error {
 	}
 	arenaConfiger := config.GetArenaConfiger()
 	user := arenaConfiger.GetUser()
-	s.args.Labels[types.UserNameIdLabel] = user.GetId()
+	s.args.Labels[types.UserNameIdLabel] = user.GetName()
 	s.args.Annotations[types.UserNameNameLabel] = user.GetName()
 	return nil
 }

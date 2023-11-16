@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+
 	"github.com/kubeflow/arena/pkg/apis/types"
 	"github.com/kubeflow/arena/pkg/util"
 	"github.com/kubeflow/arena/pkg/workflow"
@@ -17,7 +18,7 @@ func SubmitModelProfileJob(namespace string, args *types.ModelProfileArgs) error
 	}
 
 	modelJobChart := util.GetChartsFolder() + "/modeljob"
-	err := workflow.SubmitJob(args.Name, string(types.ModelProfileJob), namespace, args, modelJobChart, args.HelmOptions...)
+	err := workflow.SubmitJobByHelm(args.Name, string(types.ModelProfileJob), namespace, args, modelJobChart, args.HelmOptions...)
 	if err != nil {
 		return err
 	}

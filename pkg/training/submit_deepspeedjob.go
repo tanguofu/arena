@@ -16,6 +16,7 @@ package training
 
 import (
 	"fmt"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/kubeflow/arena/pkg/apis/types"
@@ -53,7 +54,7 @@ func SubmitDeepSpeedJob(namespace string, submitArgs *types.SubmitDeepSpeedJobAr
 	}
 	// the master is also considered as a worker
 	deepspeedjobChart := util.GetChartsFolder() + "/etjob"
-	err = workflow.SubmitJob(submitArgs.Name, string(types.DeepSpeedTrainingJob), namespace, submitArgs, deepspeedjobChart, submitArgs.HelmOptions...)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.DeepSpeedTrainingJob), namespace, submitArgs, deepspeedjobChart, submitArgs.HelmOptions...)
 	if err != nil {
 		return err
 	}

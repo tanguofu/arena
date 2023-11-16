@@ -10,7 +10,7 @@ import (
 func SubmitCronTFJob(namespace string, submitArgs *types.CronTFJobArgs) (err error) {
 	cronTFJobChart := util.GetChartsFolder() + "/cron-tfjob"
 
-	err = workflow.SubmitJob(submitArgs.Name, string(types.CronTFTrainingJob), namespace, submitArgs, cronTFJobChart, submitArgs.HelmOptions...)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.CronTFTrainingJob), namespace, submitArgs, cronTFJobChart, submitArgs.HelmOptions...)
 	if err != nil {
 		return err
 	}

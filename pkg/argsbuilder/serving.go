@@ -405,6 +405,8 @@ func (s *ServingArgsBuilder) setAnnotations() error {
 		return nil
 	}
 	s.args.Annotations = transformSliceToMap(*annotations, "=")
+
+	s.args.Annotations["ti.cloud.tencent.com/task-type"] = "Inference"
 	return nil
 }
 

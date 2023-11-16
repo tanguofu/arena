@@ -23,7 +23,7 @@ func DeleteServingJob(namespace, name, version string, jobType types.ServingJobT
 		nameWithVersion = job.Name()
 	}
 	servingType := string(job.Type())
-	err = workflow.DeleteJob(nameWithVersion, namespace, servingType)
+	err = workflow.DeleteJobByHelm(nameWithVersion, namespace, servingType)
 	if err != nil {
 		return err
 	}

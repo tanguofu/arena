@@ -8,5 +8,5 @@ import (
 
 func DeleteEvaluateJob(name, namespace string) error {
 	log.Infof("delete evaluate job, %s-%s", name, namespace)
-	return workflow.DeleteJob(name, namespace, string(types.EvaluateJob))
+	return workflow.DeleteJobByHelm(name, namespace, string(types.EvaluateJob))
 }

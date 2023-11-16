@@ -60,7 +60,7 @@ func SubmitETJob(namespace string, submitArgs *types.SubmitETJobArgs) (err error
 	}
 	// the master is also considered as a worker
 	etjobChart := util.GetChartsFolder() + "/etjob"
-	err = workflow.SubmitJob(submitArgs.Name, string(types.ETTrainingJob), namespace, submitArgs, etjobChart, submitArgs.HelmOptions...)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.ETTrainingJob), namespace, submitArgs, etjobChart, submitArgs.HelmOptions...)
 	if err != nil {
 		return err
 	}

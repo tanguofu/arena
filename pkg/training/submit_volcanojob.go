@@ -29,7 +29,7 @@ func SubmitVolcanoJob(namespace string, submitArgs *types.SubmitVolcanoJobArgs) 
 		return err
 	}
 	volcanoChart := util.GetChartsFolder() + "/volcanojob"
-	err = workflow.SubmitJob(submitArgs.Name, string(types.VolcanoTrainingJob), namespace, submitArgs, volcanoChart)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.VolcanoTrainingJob), namespace, submitArgs, volcanoChart)
 	if err != nil {
 		return err
 	}

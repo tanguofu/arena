@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	kservev1beta1 "github.com/kserve/kserve/pkg/apis/serving/v1beta1"
 	kserveClient "github.com/kserve/kserve/pkg/client/clientset/versioned"
@@ -77,13 +78,19 @@ func NewK8sResourceAccesser(config *rest.Config, clientset *kubernetes.Clientset
 	var cacheClient cache.Cache
 	var err error
 	if isDaemonMode {
-		mapper, err := apiutil.NewDynamicRESTMapper(config)
+		httpclient, err := rest.HTTPClientFor(config)
+		if err != nil {
+			log.Errorf("failed to create httpclient mapper, reason: %v", err)
+			return nil, err
+		}
+		mapper, err := apiutil.NewDynamicRESTMapper(config, httpclient)
 		if err != nil {
 			log.Errorf("failed to create cacheClient mapper, reason: %v", err)
 			// if create dynamic mapper failed, use default restMapper
 			mapper = nil
 		}
-		cacheClient, err = cache.New(config, cache.Options{Mapper: mapper, Resync: nil, Namespace: ""})
+		duration := 3 * time.Second
+		cacheClient, err = cache.New(config, cache.Options{HTTPClient: httpclient, Mapper: mapper, SyncPeriod: &duration})
 		if err != nil {
 			log.Errorf("failed to create cacheClient, reason: %v", err)
 			return nil, err

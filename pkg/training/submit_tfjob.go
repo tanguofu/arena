@@ -49,7 +49,7 @@ func SubmitTFJob(namespace string, submitArgs *types.SubmitTFJobArgs) (err error
 	if submitArgs.TFRuntime != nil {
 		tfjob_chart = util.GetChartsFolder() + "/" + submitArgs.TFRuntime.GetChartName()
 	}
-	err = workflow.SubmitJob(submitArgs.Name, string(types.TFTrainingJob), namespace, submitArgs, tfjob_chart, submitArgs.HelmOptions...)
+	err = workflow.SubmitJobByHelm(submitArgs.Name, string(types.TFTrainingJob), namespace, submitArgs, tfjob_chart, submitArgs.HelmOptions...)
 	if err != nil {
 		return err
 	}

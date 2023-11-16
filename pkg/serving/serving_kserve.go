@@ -63,7 +63,7 @@ func SubmitKServeJob(namespace string, args *types.KServeArgs) (err error) {
 	}
 	// the master is also considered as a worker
 	chart := util.GetChartsFolder() + "/kserve"
-	err = workflow.SubmitJob(args.Name, string(types.KServeJob), namespace, args, chart, args.HelmOptions...)
+	err = workflow.SubmitJobByHelm(args.Name, string(types.KServeJob), namespace, args, chart, args.HelmOptions...)
 	if err != nil {
 		return err
 	}
