@@ -43,7 +43,7 @@ func initKubeClient(kubeconfig string) (clientcmd.ClientConfig, *rest.Config, *k
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
-	restConfig.QPS = 10
+	restConfig.QPS = 100
 	restConfig.Burst = 20
 	// create the clientset
 	clientset, err := kubernetes.NewForConfig(restConfig)
@@ -52,7 +52,7 @@ func initKubeClient(kubeconfig string) (clientcmd.ClientConfig, *rest.Config, *k
 	}
 
 	dynamicClient, err := dynamic.NewForConfig(restConfig)
-	return clientConfig, restConfig, clientset, dynamicClient, nil
+	return clientConfig, restConfig, clientset, dynamicClient, err
 }
 
 func setupKubeconfig(kubeconfig string) (string, error) {

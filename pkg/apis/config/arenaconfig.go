@@ -152,6 +152,7 @@ func newArenaConfiger(args types.ArenaClientArgs) (*ArenaConfiger, error) {
 		}
 	*/
 
+	
 	namespace := updateNamespace(args.Namespace, arenaConfigs, clientConfig)
 	log.Debugf("current namespace is %v", namespace)
 

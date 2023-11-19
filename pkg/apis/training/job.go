@@ -1,6 +1,8 @@
 package training
 
 import (
+	"strings"
+
 	"github.com/kubeflow/arena/pkg/apis/types"
 )
 
@@ -43,4 +45,22 @@ func NewJob(name string, jobType types.TrainingJobType, args interface{}) *Job {
 
 func (j *Job) Type() types.TrainingJobType {
 	return types.TrainingJobType(j.baseJob.Type())
+}
+
+func SplitJobName(name string) (string, string) {
+	lastIndex := strings.LastIndex(name, "-")
+	if lastIndex == -1 {
+		return name, ""
+	}
+
+	jobName := name[:lastIndex]
+	jobType := name[lastIndex+1:]
+
+	return jobName, jobType
+}
+
+func JoinJobName(name, types string) string {
+
+	return name + "-" + types
+
 }

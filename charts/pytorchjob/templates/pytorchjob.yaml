@@ -214,7 +214,7 @@ spec:
           {{- end }}
           containers:
           - image: "{{ .Values.image }}"
-            name: pytorch
+            name: main
             imagePullPolicy: {{ .Values.imagePullPolicy }}
             {{- if .Values.workingDir }}
             workingDir: {{ .Values.workingDir }}
@@ -506,7 +506,7 @@ spec:
           {{- end }}
           containers:
             - image: "{{ .Values.image }}"
-              name: pytorch
+              name: main
               imagePullPolicy: {{ .Values.imagePullPolicy }}
               {{- if .Values.workingDir }}
               workingDir: {{ .Values.workingDir }}

@@ -24,6 +24,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
@@ -198,8 +199,31 @@ func (h *HelmClient) UninstallRelease(name string) error {
 	}
 
 	if res != nil {
-		log.Infof("uninstall name:%s info:%s", name, res.Info)
+		log.Infof("uninstall name:%s info:%+v", name, res.Release.Info)
 	}
 
 	return nil
+}
+
+func (h *HelmClient) ListRelease(namespace string) ([]*release.Release, error) {
+
+	client := action.NewList(h.actionConfig)
+	client.AllNamespaces = true
+
+	results, err := client.Run()
+	if err != nil {
+		log.Infof("list relsease from namespace: %s failed, err :%s", namespace, err)
+		return nil, err
+	}
+
+	var rels []*release.Release
+
+	for _, rel := range results {
+		if rel.Namespace == namespace {
+			rels = append(rels, rel)
+		}
+
+	}
+
+	return rels, nil
 }

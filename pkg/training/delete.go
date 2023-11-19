@@ -17,53 +17,40 @@ package training
 import (
 	"fmt"
 
+	"github.com/kubeflow/arena/pkg/apis/training"
 	"github.com/kubeflow/arena/pkg/apis/types"
-	"github.com/kubeflow/arena/pkg/apis/utils"
-	"github.com/kubeflow/arena/pkg/util/kubeclient"
 	"github.com/kubeflow/arena/pkg/workflow"
 	log "github.com/sirupsen/logrus"
 )
 
 func DeleteTrainingJob(jobName, namespace string, jobType types.TrainingJobType) error {
-	var trainingTypes []string
-	if jobType == types.UnknownTrainingJob {
-		return fmt.Errorf("Unsupport job type,arena only supports: [%v]", utils.GetSupportTrainingJobTypesInfo())
+
+	// 1. jobName with type
+	jobPrefix, typeName := training.SplitJobName(jobName)
+	for trainingType, info := range types.TrainingTypeMap {
+		if typeName == string(trainingType) || typeName == info.Alias || typeName == info.Shorthand {
+			log.Infof("delete job namespace:%s name:%s type:%s", namespace, jobName, typeName)
+			return workflow.DeleteJobByHelm(jobPrefix, namespace, string(typeName))
+		}
 	}
-	// 1. Handle legacy training job
-	/*
-		err := helm.DeleteRelease(jobName)
-		if err == nil {
-			log.Infof("Delete the job %s successfully.", jobName)
-			return nil
-		}
-		log.Debugf("%s wasn't deleted by helm due to %v", jobName, err)
-	*/
-	// if the jobType is sure,delete the job
-	var err error
-	if jobType != types.AllTrainingJob {
-		canDelete, err := kubeclient.CheckJobIsOwnedByUser(namespace, jobName, jobType)
-		if err != nil {
-			if err == kubeclient.ErrConfigMapNotFound {
-				log.Errorf("The training job '%v' does not exist,skip to delete it", jobName)
-				return types.ErrTrainingJobNotFound
-			}
-			return err
-		}
-		if !canDelete {
-			return types.ErrNoPrivilegesToOperateJob
-		}
-		return workflow.DeleteJobByHelm(jobName, namespace, string(jobType))
-	}
+	// 2 check helm list
+
 	// 2. Handle training jobs created by arena
-	trainingTypes, err = getTrainingTypes(jobName, namespace)
+	trainingTypes, err := getTrainingTypes(jobName, namespace)
 	if err != nil {
 		return err
 	}
+	if len(trainingTypes) == 0 {
+		return fmt.Errorf("not found job namespace:%s name:%s", namespace, jobName)
+	}
+
+	log.Infof("delete job namespace:%s name:%s type:%s", namespace, jobName, trainingTypes[0])
 	err = workflow.DeleteJobByHelm(jobName, namespace, trainingTypes[0])
 	if err != nil {
 		return err
 	}
 	log.Infof("The training job %s has been deleted successfully", jobName)
 	// (TODO: cheyang)3. Handle training jobs created by others, to implement
+
 	return nil
 }
