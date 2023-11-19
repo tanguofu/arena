@@ -19,7 +19,6 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/kubeflow/arena/pkg/apis/config"
@@ -145,8 +144,8 @@ func (s *SubmitArgsBuilder) AddCommandFlags(command *cobra.Command) {
 	// for anno
 	command.Flags().StringVar(&s.args.GpuType, "gpu-type", "", `the gpu type, usage: "--gpuType T4 or --gpuType HCC-A800"`)
 	command.Flags().StringVar(&s.args.ResourceGroup, "resource-group", "", `the resourcegroup of nodes, either resourcegroup or instance-type must be set, usage: "--resource-group trsg-xxx"`)
-	command.Flags().StringVar(&s.args.ResourceGroup, "instance-type", "", `the instance-type of nodes, either resourcegroup or instance-type must be set, usage: "--instance-type TI.S.MEDIUM.POST"`)
-	command.Flags().StringVar(&s.args.GpuType, "region", "", `the region of node usage: "--region ap-shanghai"`)
+	command.Flags().StringVar(&s.args.InstanceType, "instance-type", "", `the instance-type of nodes, either resourcegroup or instance-type must be set, usage: "--instance-type TI.S.MEDIUM.POST"`)
+	command.Flags().StringVar(&s.args.Region, "region", "ap-shanghai", `the region of node usage: "--region ap-shanghai"`)
 
 	s.AddArgValue("image-pull-secret", &imagePullSecrets).
 		AddArgValue("config-file", &configFiles).
@@ -322,6 +321,7 @@ func (s *SubmitArgsBuilder) setAnnotations() error {
 	}
 
 	s.args.Annotations["ti.cloud.tencent.com/task-type"] = "Training"
+	s.args.Annotations["ti.cloud.tencent.com/internet-access"] = "true"
 
 	if s.args.EnableRDMA {
 		s.args.Annotations[types.EnableRDMAAnno] = "1"
@@ -333,6 +333,7 @@ func (s *SubmitArgsBuilder) setAnnotations() error {
 
 	if s.args.InstanceType != "" {
 		s.args.Annotations[types.InstanceTypeAnno] = s.args.InstanceType
+		// s.args.Annotations["ti.cloud.tencent.com/prefer-eks"] = "true"
 	}
 
 	if s.args.ResourceGroup != "" {
@@ -625,8 +626,10 @@ func (s *SubmitArgsBuilder) setJobInfoToEnv() error {
 	if s.args.Envs == nil {
 		s.args.Envs = map[string]string{}
 	}
-	s.args.Envs["workers"] = strconv.Itoa(s.args.WorkerCount)
-	s.args.Envs["gpus"] = strconv.Itoa(s.args.GPUCount)
+	/*
+		s.args.Envs["workers"] = strconv.Itoa(s.args.WorkerCount)
+		s.args.Envs["gpus"] = strconv.Itoa(s.args.GPUCount)
+	*/
 	return nil
 }
 
